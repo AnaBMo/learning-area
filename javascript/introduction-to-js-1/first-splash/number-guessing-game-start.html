@@ -15,28 +15,47 @@
         max-width: 800px;
         min-width: 480px;
         margin: 0 auto;
+        font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        font-size: 18px;
+        color:rgb(55, 133, 87);
+        font-weight: bold;
+        background-color: none;
       }
       
-      .form input[type="number"] {
+      .formulario input[type="number"] {
         width: 200px;
       }
 
       .lastResult {
-        color: white;
+        color:white;
         padding: 3px;
       }
+
+      .guessSubmit, #botonReiniciar {
+        color:rgb(55, 133, 87);
+        background-color:antiquewhite;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+        padding: 5px;
+        font-weight: bold;
+      }
+
+  
     </style>
   </head>
 
   <body>
-    <h1>Number guessing game</h1>
+    <h1>ADIVINA EL NÚMERO</h1>
 
-    <p>We have selected a random number between 1 and 100. See if you can guess it in 10 turns or fewer. We'll tell you if your guess was too high or too low.</p>
+    <p></p>Tienes 10 oportunidades para adivinar el número del 1 al 100 que hemos 
+    seleccionado. Te indicaremos si el número introducido está por encima o por debajo. 
+    ¡Buena suerte! </p>
 
-    <div class="form">
-      <label for="guessField">Enter a guess: </label>
+    <div class="formulario">
+      <label for="guessField">Introduce un número </label>
       <input type="number" min="1" max="100" required id="guessField" class="guessField">
-      <input type="submit" value="Submit guess" class="guessSubmit">
+      <input type="submit" value="Enviar" class="guessSubmit">
     </div>
 
     <div class="resultParas">
@@ -46,8 +65,108 @@
     </div>
 
     <script>
+      // *** PARTE 1: Preparar el juego ***
+      // Aquí preparamos todo lo que el juego necesita para comenzar.
+      // Elegimos un número secreto y guardamos cuántos intentos lleva el jugador.
+      let numeroAleatorio = Math.floor(Math.random() * 100) + 1; // Elegimos un número secreto entre 1 y 100.
+      let intentos = 1; // Comenzamos con el primer intento.
+      const maxIntentos = 10; // El jugador tiene un máximo de 10 intentos.
 
-      // Your JavaScript goes here
+      // Conectamos las partes de la página para mostrar información al jugador.
+      const guesses = document.querySelector('.guesses'); // Aquí mostramos los intentos previos.
+      const lastResult = document.querySelector('.lastResult'); // Aquí mostramos si el jugador ganó o falló.
+      const lowOrHi = document.querySelector('.lowOrHi'); // Aquí mostramos pistas (más grande o más pequeño).
+      const guessField = document.querySelector('.guessField'); // Aquí el jugador escribe su número.
+      const guessSubmit = document.querySelector('.guessSubmit'); // El botón para enviar el número.
+
+      let juegoTerminado = false; // Sabemos si el juego terminó o sigue en curso.
+
+      // *** PARTE 2: Jugar el juego ***
+      // Aquí comprobamos si el número que adivinó el jugador es correcto, mayor o menor.
+      // También contamos los intentos y terminamos el juego si el jugador gana o pierde.
+      function verificarIntento() {
+        if (juegoTerminado) return; // Si el juego terminó, no hacemos nada más.
+
+        const intento = Number(guessField.value); // Tomamos el número que el jugador escribió.
+
+        // Verificamos que el número esté entre 1 y 100.
+        if (isNaN(intento) || intento < 1 || intento > 100) {
+          alert('Por favor, escribe un número válido entre 1 y 100.');
+          return;
+        }
+
+        // Mostramos el número que el jugador intentó adivinar.
+        if (guesses.textContent === '') {
+          guesses.textContent = 'Tus apuestas están siendo: ';
+        }
+        guesses.textContent += intento + ', ';
+
+        // Si el jugador acierta, mostramos un mensaje de felicitaciones.
+        if (intento === numeroAleatorio) {
+          lastResult.textContent = `¡Felicidades! Adivinaste el número en ${intentos} intentos.`;
+          lastResult.style.backgroundColor = 'rgb(55, 133, 87)';
+          lowOrHi.textContent = ''; // No hay más pistas porque el jugador ganó.
+          finalizarJuego();
+        } else if (intentos === maxIntentos) {
+          // Si el jugador llega al intento número 10 y no acierta, el juego termina.
+          lastResult.textContent = '¡Se acabaron los intentos! El número secreto era ' + numeroAleatorio + '.';
+          lastResult.style.backgroundColor = 'rgb(172, 54, 54)';
+          lowOrHi.textContent = '';
+          finalizarJuego();
+        } else {
+          // Si el jugador falla, le damos una pista (mayor o menor).
+          lastResult.textContent = '¡Fallaste! Intenta de nuevo.';
+          lastResult.style.backgroundColor = 'rgb(172, 54, 54)';
+          lowOrHi.textContent = intento < numeroAleatorio ? 'El número es más grande.' : 'El número es más pequeño.';
+        }
+
+        intentos++; // Sumamos uno al contador de intentos.
+        guessField.value = ''; // Borramos el campo de entrada para el próximo intento.
+        guessField.focus(); // Ponemos el cursor de nuevo en el campo.
+      }
+
+      // Conectamos el botón para que llame a nuestra función cuando el jugador haga clic.
+      guessSubmit.addEventListener('click', verificarIntento);
+
+      // *** PARTE 3: Terminar y reiniciar el juego ***
+      // Aquí terminamos el juego y mostramos un botón para reiniciarlo.
+      // También reiniciamos todo para que el jugador pueda volver a jugar.
+      function finalizarJuego() {
+        juegoTerminado = true; // Indicamos que el juego ha terminado.
+        guessField.disabled = true; // Desactivamos el campo de entrada.
+        guessSubmit.disabled = true; // Desactivamos el botón.
+
+        const botonReiniciar = document.createElement('button'); // Creamos un botón para reiniciar.
+        botonReiniciar.setAttribute('id', 'botonReiniciar'); // Asignar el id.
+        botonReiniciar.textContent = 'Reiniciar juego'; // Le damos un texto al botón.
+        document.body.appendChild(botonReiniciar); // Lo añadimos a la página.
+
+        botonReiniciar.addEventListener('click', reiniciarJuego); // Conectamos el botón para que reinicie el juego.
+      }
+
+      function reiniciarJuego() {
+        intentos = 1; // Reiniciamos el contador de intentos.
+        juegoTerminado = false; // Indicamos que el juego está listo para empezar otra vez.
+
+        // Quitamos el botón de reinicio.
+        const botonReiniciar = document.querySelector('button');
+        botonReiniciar.parentNode.removeChild(botonReiniciar);
+
+        // Reactivamos el campo de entrada y el botón.
+        guessField.disabled = false;
+        guessSubmit.disabled = false;
+        guessField.value = ''; // Borramos el campo de entrada.
+        guessField.focus(); // Ponemos el cursor en el campo.
+
+        // Borramos los mensajes anteriores.
+        guesses.textContent = '';
+        lastResult.textContent = '';
+        lastResult.style.backgroundColor = '';
+        lowOrHi.textContent = '';
+
+        // Elegimos un nuevo número secreto.
+        numeroAleatorio = Math.floor(Math.random() * 100) + 1;
+      }
 
     </script>
   </body>
